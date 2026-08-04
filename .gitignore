@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+node_modules 2/
+
+# Build output
+dist/
+
+# macOS
+.DS_Store
+
+# Logs & env
+*.log
+.env
+.env.*
