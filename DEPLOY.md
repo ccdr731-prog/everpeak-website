@@ -77,3 +77,60 @@ Vercel 检测到推送后会自动重新构建并上线，无需手动操作。
 - **预览地址打不开？** 等待部署完成（Production 状态显示 Ready 后再访问）。
 - **图片不显示？** 确认 `public/` 下的图片文件名与代码引用一致（`/blade.jpg` 等）。
 - **想部署到子路径（如 GitHub Pages）？** 需要修改 `vite.config.js` 的 `base` 配置，可联系我处理。
+
+---
+
+## 附录：腾讯云 DNSPod 绑定自定义域名（energyblock.cn）
+
+### 1. 进入 DNSPod 解析管理
+
+1. 打开 https://console.dnspod.cn/dns/list 并登录
+2. 在「我的域名」列表中找到 `energyblock.cn`
+3. 点击右侧的「解析」按钮进入记录管理页
+
+### 2. 删除冲突的旧记录
+
+在记录列表中找到以下 **3 条 A 记录**，逐条点击右侧「删除」：
+
+| 类型 | 主机记录 | 记录值 |
+|---|---|---|
+| A | www | 43.153.254.91 |
+| A | www | 43.163.180.183 |
+| A | www | 43.153.249.198 |
+
+> 这些是腾讯云服务器/CDN 的旧 IP，与 Vercel 冲突，必须删掉。
+
+### 3. 添加 Vercel 的 CNAME 记录
+
+点击「添加记录」，填写：
+
+| 字段 | 值 |
+|---|---|
+| 记录类型 | CNAME |
+| 主机记录 | www |
+| 记录值 | `d84756147c08c904.vercel-dns.com` |
+| 其他 | 保持默认（TTL 600） |
+
+点击「保存」。
+
+### 4.（可选）绑定根域名 energyblock.cn
+
+如果需要不带 `www` 的域名也能访问，再添加一条：
+
+| 字段 | 值 |
+|---|---|
+| 记录类型 | A |
+| 主机记录 | @ |
+| 记录值 | `216.198.79.10` |
+
+### 5. 等待生效并刷新 Vercel
+
+1. DNSPod 的 TTL 默认 600 秒，保存后等 **10 分钟～几小时**
+2. 回到 Vercel → Settings → Domains → `www.energyblock.cn` → 点 **Refresh**
+3. 状态从 `Invalid Configuration` 变为绿色 `Valid Configuration` 即成功
+
+### 备注
+
+- 若 DNSPod 提示记录值不能以 `.` 结尾，去掉 Vercel 显示末尾的点即可
+- 主机记录 `@` 表示根域名，`www` 表示 www 前缀
+- 如果 DNSPod 里找不到该域名，说明域名 NS 服务器不在 DNSPod，需先到注册商把 NS 改为 DNSPod 的 `f1g1ns1.dnspod.net` / `f1g1ns2.dnspod.net`
